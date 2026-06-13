@@ -17,6 +17,9 @@ class Button {
     
     // Returns true if the button was just pressed (falling edge)
     bool wasPressed();
+
+    // Returns true if the button is currently held down
+    bool isPressed();
 };
 
 #endif

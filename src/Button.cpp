@@ -25,3 +25,8 @@ bool Button::wasPressed() {
   lastState = reading;
   return pressed;
 }
+
+bool Button::isPressed() {
+  // Simple check, returns true if currently LOW (held down)
+  return digitalRead(pin) == LOW;
+}

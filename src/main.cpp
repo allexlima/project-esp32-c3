@@ -5,7 +5,7 @@
 
 // Custom Classes
 #include "Button.h"
-#include "Animation.h"
+#include "Game.h"
 
 // ---------------------------------------------------------
 // Hardware Configuration
@@ -25,7 +25,7 @@
 // Global Objects
 // ---------------------------------------------------------
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
-Animation myAnimation(tft);
+Game superLeco(tft);
 
 Button btnK1(K1_PIN);
 Button btnK2(K2_PIN);
@@ -44,30 +44,26 @@ void setup() {
   SPI.begin(TFT_SCLK, -1, TFT_MOSI, TFT_CS);
   tft.initR(INITR_144GREENTAB);
   tft.setRotation(2);
-  tft.fillScreen(ST77XX_BLACK);
-  tft.setTextWrap(false);
 
-  // Initialize Animation state
-  myAnimation.begin();
+  // Initialize Game
+  superLeco.begin();
 
-  Serial.println("System Initialized!");
+  Serial.println("System Initialized! Ready for Super Leco Room.");
 }
 
 // ---------------------------------------------------------
 // Main Loop
 // ---------------------------------------------------------
 void loop() {
-  // 1. Handle Input (Non-blocking)
+  // 1. Handle Input
   if (btnK1.wasPressed()) {
-    Serial.println("K1 Pressed! Changing color.");
-    myAnimation.changeColor();
+    superLeco.jump();
   }
   
   if (btnK2.wasPressed()) {
-    Serial.println("K2 Pressed! Changing speed.");
-    myAnimation.changeSpeed();
+    superLeco.fireball();
   }
 
-  // 2. Render next animation frame
-  myAnimation.update();
+  // 2. Render next frame
+  superLeco.update();
 }
