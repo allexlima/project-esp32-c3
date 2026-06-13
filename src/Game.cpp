@@ -98,23 +98,35 @@ void Game::drawTintedSprite(int x, int y, const uint16_t* sprite, uint16_t tintC
 void Game::drawTitleScreen() {
     tft.fillRect(0, 0, SCREEN_W, GROUND_Y, C_SKY);
     
-    // Draw Logo/Text
-    tft.setCursor(10, 20);
-    tft.setTextColor(ST77XX_RED);
-    tft.setTextSize(2);
-    tft.print("SUPER LECO");
+    // Draw Logo Frame
+    tft.fillRoundRect(8, 10, SCREEN_W - 16, 45, 8, ST77XX_RED);
+    tft.drawRoundRect(8, 10, SCREEN_W - 16, 45, 8, ST77XX_WHITE);
+    tft.drawRoundRect(9, 11, SCREEN_W - 18, 43, 7, ST77XX_YELLOW); // Double border
 
-    tft.setCursor(35, 45);
+    // SUPER text with drop shadow
+    tft.setTextSize(2);
+    tft.setCursor(20, 18);
+    tft.setTextColor(ST77XX_BLACK); // shadow
+    tft.print("SUPER");
+    tft.setCursor(18, 16);
     tft.setTextColor(ST77XX_WHITE);
+    tft.print("SUPER");
+
+    // LECO ROOM text with drop shadow
     tft.setTextSize(1);
-    tft.print("ROOM");
+    tft.setCursor(38, 38);
+    tft.setTextColor(ST77XX_BLACK); // shadow
+    tft.print("LECO ROOM");
+    tft.setCursor(37, 37);
+    tft.setTextColor(ST77XX_YELLOW);
+    tft.print("LECO ROOM");
 
     // Instructions
-    tft.setCursor(15, 70);
+    tft.setCursor(15, 65);
     tft.setTextColor(ST77XX_YELLOW);
     tft.print("K1: JUMP");
-    tft.setCursor(15, 85);
-    tft.print("K2 (Hold): SPRINT");
+    tft.setCursor(15, 80);
+    tft.print("K2: SPRINT (Hold)");
 
     // Blink Start Prompt
     if ((millis() / 500) % 2 == 0) {
