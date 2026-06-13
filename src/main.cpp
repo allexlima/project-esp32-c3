@@ -1,51 +1,73 @@
 #include <Arduino.h>
+#include <SPI.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_ST7735.h>
-#include <SPI.h>
 
-// Pin definitions for ESP32-C3
+// Custom Classes
+#include "Button.h"
+#include "Animation.h"
+
+// ---------------------------------------------------------
+// Hardware Configuration
+// ---------------------------------------------------------
+// Display Pins
 #define TFT_MOSI  4
 #define TFT_SCLK  3
 #define TFT_CS    2
 #define TFT_DC    0
 #define TFT_RST   5
 
-Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
+// Button Pins
+#define K1_PIN    8
+#define K2_PIN    10
 
+// ---------------------------------------------------------
+// Global Objects
+// ---------------------------------------------------------
+Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
+Animation myAnimation(tft);
+
+Button btnK1(K1_PIN);
+Button btnK2(K2_PIN);
+
+// ---------------------------------------------------------
+// Setup
+// ---------------------------------------------------------
 void setup() {
   Serial.begin(115200);
-  delay(1000);
-  Serial.println("Starting Hello World...");
 
-  // Initialize SPI with custom pins for ESP32-C3
+  // Initialize buttons
+  btnK1.begin();
+  btnK2.begin();
+
+  // Initialize Display
   SPI.begin(TFT_SCLK, -1, TFT_MOSI, TFT_CS);
-
-  // Initialize 128x128 ST7735 display (green tab variant)
   tft.initR(INITR_144GREENTAB);
   tft.setRotation(2);
-  tft.fillScreen(ST77XX_BLUE);
+  tft.fillScreen(ST77XX_BLACK);
+  tft.setTextWrap(false);
 
-  tft.setTextColor(ST77XX_YELLOW);
-  tft.setTextSize(2);
-  tft.setCursor(10, 50);
-  tft.println("Hello");
-  tft.setCursor(10, 70);
-  tft.println("World!");
+  // Initialize Animation state
+  myAnimation.begin();
 
-  Serial.println("Display initialized.");
+  Serial.println("System Initialized!");
 }
 
+// ---------------------------------------------------------
+// Main Loop
+// ---------------------------------------------------------
 void loop() {
-  // Blink onboard LED on GPIO 8
-  static bool ledInit = false;
-  if (!ledInit) {
-    pinMode(8, OUTPUT);
-    ledInit = true;
+  // 1. Handle Input (Non-blocking)
+  if (btnK1.wasPressed()) {
+    Serial.println("K1 Pressed! Changing color.");
+    myAnimation.changeColor();
+  }
+  
+  if (btnK2.wasPressed()) {
+    Serial.println("K2 Pressed! Changing speed.");
+    myAnimation.changeSpeed();
   }
 
-  digitalWrite(8, HIGH);
-  delay(500);
-  digitalWrite(8, LOW);
-  delay(500);
-  Serial.println("Tick...");
+  // 2. Render next animation frame
+  myAnimation.update();
 }
