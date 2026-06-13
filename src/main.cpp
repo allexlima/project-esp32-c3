@@ -43,7 +43,7 @@ void setup() {
   // Initialize Display
   SPI.begin(TFT_SCLK, -1, TFT_MOSI, TFT_CS);
   tft.initR(INITR_144GREENTAB);
-  tft.setRotation(2);
+  tft.setRotation(3); // 3 rotates it anticlockwise relative to 2
 
   // Initialize Game
   superLeco.begin();

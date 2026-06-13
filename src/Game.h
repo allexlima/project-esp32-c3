@@ -16,6 +16,12 @@ struct Pipe {
     bool active;
 };
 
+struct Scenery {
+    float x;
+    int y;
+    int type; // 0 = cloud, 1 = bush
+};
+
 class Game {
   private:
     Adafruit_ST7735& tft;
@@ -32,6 +38,7 @@ class Game {
 
     // Entities
     Pipe pipes[NUM_PIPES];
+    Scenery bgScenery[3]; // 3 background objects (clouds/bushes)
     
     // World
     float bgX;
@@ -44,6 +51,7 @@ class Game {
     unsigned long lastFrameTime;
 
     void drawSprite(int x, int y, const uint16_t* sprite);
+    void drawTintedSprite(int x, int y, const uint16_t* sprite, uint16_t tintColor);
     void resetGame();
     void spawnPipe(int index);
 

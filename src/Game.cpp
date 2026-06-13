@@ -19,6 +19,11 @@ void Game::resetGame() {
     // Spawn first pipe
     spawnPipe(0);
     pipes[0].x = SCREEN_W;
+
+    // Initialize scenery
+    bgScenery[0] = {SCREEN_W + 10, 20, 0}; // Cloud
+    bgScenery[1] = {SCREEN_W + 80, 40, 0}; // Cloud
+    bgScenery[2] = {SCREEN_W + 40, GROUND_Y - 16, 1}; // Bush
 }
 
 void Game::spawnPipe(int index) {
@@ -27,8 +32,11 @@ void Game::spawnPipe(int index) {
 }
 
 void Game::begin() {
-    tft.fillScreen(0x5CDF); // Light blue sky color
-    tft.fillRect(0, GROUND_Y, SCREEN_W, SCREEN_H - GROUND_Y, C_BRWN); // Ground
+    tft.fillScreen(C_SKY); // Mario Blue Sky
+    // Initial draw of the brick floor
+    for (int i = 0; i < SCREEN_W; i += 16) {
+        drawSprite(i, GROUND_Y, brickSprite);
+    }
 }
 
 void Game::jump() {
@@ -50,13 +58,25 @@ void Game::fireball() {
 }
 
 void Game::drawSprite(int x, int y, const uint16_t* sprite) {
-    // Basic sprite drawing loop (ignores transparent pixels)
     int k = 0;
     for (int i = 0; i < 16; i++) {
         for (int j = 0; j < 16; j++) {
             uint16_t color = pgm_read_word(&sprite[k++]);
             if (color != C_TRANS) {
                 tft.drawPixel(x + j, y + i, color);
+            }
+        }
+    }
+}
+
+// Special draw for tinted sprites (bushes are just green clouds)
+void Game::drawTintedSprite(int x, int y, const uint16_t* sprite, uint16_t tintColor) {
+    int k = 0;
+    for (int i = 0; i < 16; i++) {
+        for (int j = 0; j < 16; j++) {
+            uint16_t color = pgm_read_word(&sprite[k++]);
+            if (color == C_WHT) { // Replace white with tint
+                tft.drawPixel(x + j, y + i, tintColor);
             }
         }
     }
@@ -76,11 +96,9 @@ void Game::update() {
     }
 
     // --- PHYSICS ---
-    // Apply gravity
     marioVY += gravity;
     marioY += marioVY;
 
-    // Floor collision
     if (marioY >= GROUND_Y - 16) {
         marioY = GROUND_Y - 16;
         marioVY = 0;
@@ -95,22 +113,40 @@ void Game::update() {
                 spawnPipe(i);
                 score++;
             }
-            
-            // Basic collision logic (Bounding Box)
-            // Mario is at x=20, width=16, y=marioY, height=16
-            // Pipe is at x=pipes[i].x, width=16, y=GROUND_Y-16, height=16
-            if (pipes[i].x < 20 + 12 && pipes[i].x + 12 > 20) { // X overlap
-                if (marioY + 14 > GROUND_Y - 16) { // Y overlap (hit the pipe)
+            if (pipes[i].x < 20 + 12 && pipes[i].x + 12 > 20) { 
+                if (marioY + 14 > GROUND_Y - 16) { 
                     isGameOver = true;
                 }
             }
         }
     }
 
+    // Move Scenery
+    for (int i = 0; i < 3; i++) {
+        bgScenery[i].x -= (gameSpeed * 0.5); // Parallax scrolling (slower)
+        if (bgScenery[i].x < -16) {
+            bgScenery[i].x = SCREEN_W + random(10, 50);
+            // Randomize height slightly for clouds
+            if (bgScenery[i].type == 0) bgScenery[i].y = random(10, 50);
+        }
+    }
+
+    // Scroll floor
+    bgX -= gameSpeed;
+    if (bgX <= -16) bgX += 16;
+
     // --- RENDERING ---
-    // Instead of full clear (which flickers), we draw a solid rect over where Mario WAS,
-    // but calculating dirty rects is better. For now, clear the "sky" area quickly:
-    tft.fillRect(0, 0, SCREEN_W, GROUND_Y, 0x5CDF);
+    // Clear sky
+    tft.fillRect(0, 0, SCREEN_W, GROUND_Y, C_SKY);
+
+    // Draw Scenery
+    for (int i = 0; i < 3; i++) {
+        if (bgScenery[i].type == 0) {
+            drawSprite((int)bgScenery[i].x, bgScenery[i].y, cloudSprite); // Cloud
+        } else {
+            drawTintedSprite((int)bgScenery[i].x, bgScenery[i].y, cloudSprite, 0x0520); // Bush (dark green tint)
+        }
+    }
 
     // Draw Mario
     drawSprite(20, (int)marioY, marioSprite);
@@ -119,9 +155,13 @@ void Game::update() {
     for (int i = 0; i < NUM_PIPES; i++) {
         if (pipes[i].active) {
             drawSprite((int)pipes[i].x, GROUND_Y - 16, pipeTopSprite);
-            // Draw pipe body down to ground
             tft.fillRect((int)pipes[i].x + 2, GROUND_Y, 12, SCREEN_H - GROUND_Y, C_GREN);
         }
+    }
+
+    // Draw Scrolling Floor Bricks
+    for (int i = bgX; i < SCREEN_W; i += 16) {
+        drawSprite(i, GROUND_Y, brickSprite);
     }
 
     // Draw Score
