@@ -14,6 +14,7 @@
 struct Enemy {
     float x;
     bool active;
+    int type; // 0 = Goomba, 1 = Pipe
 };
 
 struct Scenery {

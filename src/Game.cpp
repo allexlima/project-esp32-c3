@@ -26,6 +26,7 @@ void Game::resetGame() {
 
 void Game::spawnEnemy(int index) {
     enemies[index].x = SCREEN_W + random(20, 80);
+    enemies[index].type = random(0, 2); // Randomly choose 0 or 1
     enemies[index].active = true;
 }
 
@@ -238,10 +239,15 @@ void Game::update() {
     // Draw Mario
     drawSprite(20, (int)marioY, marioSprite);
 
-    // Draw Enemies (Goombas)
+    // Draw Enemies (Goombas or Pipes)
     for (int i = 0; i < NUM_ENEMIES; i++) {
         if (enemies[i].active) {
-            drawSprite((int)enemies[i].x, GROUND_Y - 16, goombaSprite);
+            if (enemies[i].type == 0) {
+                drawSprite((int)enemies[i].x, GROUND_Y - 16, goombaSprite); // Goomba
+            } else {
+                drawSprite((int)enemies[i].x, GROUND_Y - 16, pipeTopSprite); // Pipe
+                tft.fillRect((int)enemies[i].x + 2, GROUND_Y, 12, SCREEN_H - GROUND_Y, C_GREN); // Pipe body
+            }
         }
     }
 
