@@ -9,9 +9,9 @@
 #define SCREEN_H 128
 #define GROUND_Y 112 // 128 - 16
 
-#define NUM_PIPES 2
+#define NUM_ENEMIES 2
 
-struct Pipe {
+struct Enemy {
     float x;
     bool active;
 };
@@ -22,9 +22,21 @@ struct Scenery {
     int type; // 0 = cloud, 1 = bush
 };
 
+enum GameState {
+    STATE_TITLE,
+    STATE_PLAYING,
+    STATE_GAMEOVER
+};
+
 class Game {
   private:
     Adafruit_ST7735& tft;
+
+    // Game State
+    GameState currentState;
+    bool stateJustChanged;
+    int score;
+    bool isSprinting;
 
     // Mario Physics
     float marioY;
@@ -37,15 +49,11 @@ class Game {
     const float gameSpeed = 2.0;
 
     // Entities
-    Pipe pipes[NUM_PIPES];
+    Enemy enemies[NUM_ENEMIES];
     Scenery bgScenery[3]; // 3 background objects (clouds/bushes)
     
     // World
     float bgX;
-
-    // Game State
-    bool isGameOver;
-    int score;
 
     // Timing
     unsigned long lastFrameTime;
@@ -53,7 +61,8 @@ class Game {
     void drawSprite(int x, int y, const uint16_t* sprite);
     void drawTintedSprite(int x, int y, const uint16_t* sprite, uint16_t tintColor);
     void resetGame();
-    void spawnPipe(int index);
+    void spawnEnemy(int index);
+    void drawTitleScreen();
 
   public:
     Game(Adafruit_ST7735& display);
@@ -63,7 +72,8 @@ class Game {
 
     // Inputs
     void jump();
-    void fireball(); // To be implemented, currently just visual
+    void fireball();
+    void setSprint(bool sprinting);
 };
 
 #endif

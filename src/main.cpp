@@ -43,7 +43,7 @@ void setup() {
   // Initialize Display
   SPI.begin(TFT_SCLK, -1, TFT_MOSI, TFT_CS);
   tft.initR(INITR_144GREENTAB);
-  tft.setRotation(3); // 3 rotates it anticlockwise relative to 2
+  tft.setRotation(1); // 1 rotates it clockwise relative to 2
 
   // Initialize Game
   superLeco.begin();
@@ -61,8 +61,10 @@ void loop() {
   }
   
   if (btnK2.wasPressed()) {
-    superLeco.fireball();
+    superLeco.fireball(); // Still acts as 'Start' button on title screen
   }
+
+  superLeco.setSprint(btnK2.isPressed());
 
   // 2. Render next frame
   superLeco.update();
